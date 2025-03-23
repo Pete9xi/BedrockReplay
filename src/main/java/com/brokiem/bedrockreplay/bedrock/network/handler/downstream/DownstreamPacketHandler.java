@@ -22,8 +22,10 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import lombok.SneakyThrows;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockCodecHelper;
+import org.cloudburstmc.protocol.bedrock.data.PacketCompressionAlgorithm;
 import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataTypes;
+import org.cloudburstmc.protocol.bedrock.netty.codec.compression.SimpleCompressionStrategy;
 import org.cloudburstmc.protocol.bedrock.packet.*;
 import org.cloudburstmc.protocol.bedrock.util.EncryptionUtils;
 import org.cloudburstmc.protocol.common.PacketSignal;
@@ -47,7 +49,9 @@ public class DownstreamPacketHandler implements BedrockPacketHandler {
     public PacketSignal handle(NetworkSettingsPacket packet) {
         player.getDownstreamSession().getPeer().setCodec(ProxyServer.BEDROCK_CODEC);
         player.getDownstreamSession().getPeer().setCompression(packet.getCompressionAlgorithm());
-        player.getDownstreamSession().getPeer().setCompressionLevel(packet.getCompressionThreshold());
+        player.getDownstreamSession().getPeer().setCompression(PacketCompressionAlgorithm.ZLIB);
+
+
 
         try {
             player.getDownstreamSession().sendPacketImmediately(player.getLoginPacket());
@@ -73,7 +77,7 @@ public class DownstreamPacketHandler implements BedrockPacketHandler {
     public PacketSignal handle(ServerToClientHandshakePacket packet) {
         SignedJWT saltJwt = SignedJWT.parse(packet.getJwt());
         URI x5u = saltJwt.getHeader().getX509CertURL();
-        ECPublicKey serverKey = EncryptionUtils.generateKey(x5u.toASCIIString());
+        ECPublicKey serverKey = EncryptionUtils.parseKey(x5u.toASCIIString());
         SecretKey key = EncryptionUtils.getSecretKey(this.player.getKeyPair().getPrivate(), serverKey, Base64.getDecoder().decode(saltJwt.getJWTClaimsSet().getStringClaim("salt")));
         this.player.getDownstreamSession().enableEncryption(key);
 

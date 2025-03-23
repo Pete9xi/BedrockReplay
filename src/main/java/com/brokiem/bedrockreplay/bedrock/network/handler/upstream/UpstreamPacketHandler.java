@@ -42,21 +42,22 @@ public class UpstreamPacketHandler implements BedrockPacketHandler {
     }
 
     @Override
-    public PacketSignal handle(LoginPacket packet) {
-        String extraData = packet.getExtra().getParsedString();
-        String downstreamAddress = ProxyServer.getInstance().getDownstreamAddress();
-        int downstreamPort = ProxyServer.getInstance().getDownstreamPort();
+public PacketSignal handle(LoginPacket packet) {
+    String extraData = packet.getExtra();
+    String downstreamAddress = ProxyServer.getInstance().getDownstreamAddress();
+    int downstreamPort = ProxyServer.getInstance().getDownstreamPort();
 
-        player.setSkinData(JSONObject.parseObject(new String(Base64.getUrlDecoder().decode(extraData.split("\\.")[1]))));
+    player.setSkinData(JSONObject.parseObject(new String(Base64.getUrlDecoder().decode(extraData.split("\\.")[1]))));
 
-        PlayStatusPacket playStatusPacket = new PlayStatusPacket();
-        playStatusPacket.setStatus(PlayStatusPacket.Status.LOGIN_SUCCESS);
-        player.getSession().sendPacket(playStatusPacket);
+    PlayStatusPacket playStatusPacket = new PlayStatusPacket();
+    playStatusPacket.setStatus(PlayStatusPacket.Status.LOGIN_SUCCESS);
+    player.getSession().sendPacket(playStatusPacket);
 
-        // Connect to downstream server
-        player.connect(downstreamAddress, downstreamPort);
-        return PacketSignal.HANDLED;
-    }
+    // Connect to downstream server
+    player.connect(downstreamAddress, downstreamPort);
+    return PacketSignal.HANDLED;
+}
+
 
     @Override
     public PacketSignal handle(ClientCacheStatusPacket packet) {

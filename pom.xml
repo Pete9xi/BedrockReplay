@@ -7,7 +7,7 @@
     <version>1.0.0-SNAPSHOT</version>
 
     <properties>
-        <bedrockprotocol.version>3.0.0.Beta1-SNAPSHOT</bedrockprotocol.version>
+        <bedrockprotocol.version>3.0.0.Beta6-SNAPSHOT</bedrockprotocol.version>
     </properties>
 
     <repositories>
@@ -28,6 +28,19 @@
             <version>${bedrockprotocol.version}</version>
             <scope>compile</scope>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt -->
+<dependency>
+    <groupId>com.nimbusds</groupId>
+    <artifactId>nimbus-jose-jwt</artifactId>
+    <version>9.31</version>
+</dependency>
+
+<dependency>
+    <groupId>org.bitbucket.b_c</groupId>
+    <artifactId>jose4j</artifactId>
+    <version>0.9.6</version>
+</dependency>
 
         <dependency>
             <groupId>com.alibaba</groupId>

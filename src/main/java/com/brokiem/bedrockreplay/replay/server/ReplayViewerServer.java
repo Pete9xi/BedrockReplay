@@ -30,7 +30,7 @@ import org.cloudburstmc.protocol.bedrock.BedrockPong;
 import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockCodec;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockCodecHelper;
-import org.cloudburstmc.protocol.bedrock.codec.v589.Bedrock_v589;
+import org.cloudburstmc.protocol.bedrock.codec.v776.Bedrock_v776;
 import org.cloudburstmc.protocol.bedrock.data.*;
 import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
@@ -38,7 +38,7 @@ import org.cloudburstmc.protocol.bedrock.netty.initializer.BedrockServerInitiali
 import org.cloudburstmc.protocol.bedrock.packet.*;
 import org.cloudburstmc.protocol.common.SimpleDefinitionRegistry;
 import org.cloudburstmc.protocol.common.util.OptionalBoolean;
-
+import org.cloudburstmc.protocol.bedrock.data.inventory.CreativeItemData;
 import java.io.ByteArrayOutputStream;
 import java.net.InetSocketAddress;
 import java.util.Collections;
@@ -52,7 +52,7 @@ public class ReplayViewerServer {
     @Getter
     private final InetSocketAddress address;
 
-    public static final BedrockCodec BEDROCK_CODEC = Bedrock_v589.CODEC;
+    public static final BedrockCodec BEDROCK_CODEC = Bedrock_v776.CODEC;
     public static final BedrockCodecHelper CODEC_HELPER = BEDROCK_CODEC.createHelper();
 
     private boolean isRunning = false;
@@ -120,7 +120,8 @@ public class ReplayViewerServer {
         player.getSession().sendPacket(entityPacket);
 
         CreativeContentPacket packet = new CreativeContentPacket();
-        packet.setContents(new ItemData[0]);
+        packet.getContents().clear(); 
+        packet.getContents().addAll(Collections.emptyList()); 
         player.getSession().sendPacket(packet);
 
         PlayStatusPacket playStatusPacket = new PlayStatusPacket();

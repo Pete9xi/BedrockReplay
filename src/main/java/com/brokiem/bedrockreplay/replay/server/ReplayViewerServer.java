@@ -26,12 +26,11 @@ import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.nbt.NbtUtils;
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
-import org.cloudburstmc.netty.handler.codec.raknet.server.RakServerRateLimiter;
 import org.cloudburstmc.protocol.bedrock.BedrockPong;
 import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockCodec;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockCodecHelper;
-import org.cloudburstmc.protocol.bedrock.codec.v786.Bedrock_v786;
+import org.cloudburstmc.protocol.bedrock.codec.v776.Bedrock_v776;
 import org.cloudburstmc.protocol.bedrock.data.*;
 import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
@@ -53,7 +52,7 @@ public class ReplayViewerServer {
     @Getter
     private final InetSocketAddress address;
 
-    public static final BedrockCodec BEDROCK_CODEC = Bedrock_v786.CODEC;
+    public static final BedrockCodec BEDROCK_CODEC = Bedrock_v776.CODEC;
     public static final BedrockCodecHelper CODEC_HELPER = BEDROCK_CODEC.createHelper();
 
     private boolean isRunning = false;
@@ -92,7 +91,6 @@ public class ReplayViewerServer {
 
         new ServerBootstrap()
                 .channelFactory(RakChannelFactory.server(NioDatagramChannel.class))
-                .option(RakChannelOption.RAK_IP_DONT_FRAGMENT, true)
                 .option(RakChannelOption.RAK_ADVERTISEMENT, pong.toByteBuf())
                 .group(new NioEventLoopGroup())
                 .childHandler(new BedrockServerInitializer() {

@@ -29,35 +29,59 @@ public class UpstreamPacketHandler implements BedrockPacketHandler {
 
     @Override
     public PacketSignal handle(RequestNetworkSettingsPacket packet) {
+        int protocolVersion = packet.getProtocolVersion();
+
+        // Check protocol version compatibility
+        if (protocolVersion != ProxyServer.BEDROCK_CODEC.getProtocolVersion()) {
+            PlayStatusPacket status = new PlayStatusPacket();
+            if (protocolVersion > ProxyServer.BEDROCK_CODEC.getProtocolVersion()) {
+                status.setStatus(PlayStatusPacket.Status.LOGIN_FAILED_SERVER_OLD);
+            } else {
+                status.setStatus(PlayStatusPacket.Status.LOGIN_FAILED_CLIENT_OLD);
+            }
+
+            player.getSession().sendPacketImmediately(status);
+            OutputWindow.print("Client disconnected due to protocol version mismatch: " + protocolVersion);
+            return PacketSignal.HANDLED;
+        }
+
+        // Set codec and compression settings
         NetworkSettingsPacket networkSettingsPacket = new NetworkSettingsPacket();
-        networkSettingsPacket.setCompressionThreshold(1);
+        networkSettingsPacket.setCompressionThreshold(0);
         networkSettingsPacket.setCompressionAlgorithm(PacketCompressionAlgorithm.ZLIB);
         networkSettingsPacket.setClientThrottleEnabled(false);
         networkSettingsPacket.setClientThrottleThreshold(0);
         networkSettingsPacket.setClientThrottleScalar(0);
-        player.getSession().sendPacketImmediately(networkSettingsPacket);
 
+        player.getSession().sendPacketImmediately(networkSettingsPacket);
         player.getSession().getPeer().setCompression(PacketCompressionAlgorithm.ZLIB);
+        OutputWindow.print("Network settings applied for protocol version: " + protocolVersion);
         return PacketSignal.HANDLED;
     }
 
     @Override
-public PacketSignal handle(LoginPacket packet) {
-    String extraData = packet.getExtra();
-    String downstreamAddress = ProxyServer.getInstance().getDownstreamAddress();
-    int downstreamPort = ProxyServer.getInstance().getDownstreamPort();
+    public PacketSignal handle(LoginPacket packet) {
+        try {
+            // Extract and decode extraData
+            String extraData = packet.getExtra();
+            player.setSkinData(JSONObject.parseObject(new String(Base64.getUrlDecoder().decode(extraData.split("\\.")[1]))));
 
-    player.setSkinData(JSONObject.parseObject(new String(Base64.getUrlDecoder().decode(extraData.split("\\.")[1]))));
+            // Send login success
+            PlayStatusPacket playStatusPacket = new PlayStatusPacket();
+            playStatusPacket.setStatus(PlayStatusPacket.Status.LOGIN_SUCCESS);
+            player.getSession().sendPacket(playStatusPacket);
 
-    PlayStatusPacket playStatusPacket = new PlayStatusPacket();
-    playStatusPacket.setStatus(PlayStatusPacket.Status.LOGIN_SUCCESS);
-    player.getSession().sendPacket(playStatusPacket);
-
-    // Connect to downstream server
-    player.connect(downstreamAddress, downstreamPort);
-    return PacketSignal.HANDLED;
-}
-
+            // Connect to downstream server
+            String downstreamAddress = ProxyServer.getInstance().getDownstreamAddress();
+            int downstreamPort = ProxyServer.getInstance().getDownstreamPort();
+            player.connect(downstreamAddress, downstreamPort);
+        } catch (Exception e) {
+            OutputWindow.print("Login failed: " + e.getMessage());
+            player.getSession().disconnect("disconnectionScreen.internalError.cantConnect");
+            return PacketSignal.HANDLED;
+        }
+        return PacketSignal.HANDLED;
+    }
 
     @Override
     public PacketSignal handle(ClientCacheStatusPacket packet) {

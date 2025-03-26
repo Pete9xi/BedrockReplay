@@ -5,6 +5,7 @@
 
 package com.brokiem.bedrockreplay.replay.server.handler;
 
+import com.brokiem.bedrockreplay.output.OutputWindow;
 import com.brokiem.bedrockreplay.replay.ReplayData;
 import com.brokiem.bedrockreplay.replay.ReplayManager;
 import com.brokiem.bedrockreplay.replay.server.ReplayViewerServer;
@@ -290,7 +291,7 @@ public class PacketHandler implements BedrockPacketHandler {
 
     @Override
     public PacketSignal handlePacket(BedrockPacket packet) {
-        //OutputWindow.print("IN: " + packet.toString());
+        OutputWindow.print("IN: " + packet.toString());
 
         packet.handle(this);
         return PacketSignal.HANDLED;

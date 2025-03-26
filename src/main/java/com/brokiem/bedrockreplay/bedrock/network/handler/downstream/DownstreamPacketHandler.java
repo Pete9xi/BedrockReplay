@@ -564,7 +564,7 @@ public class DownstreamPacketHandler implements BedrockPacketHandler {
 
     @Override
     public PacketSignal handlePacket(BedrockPacket packet) {
-        //OutputWindow.print("DOWNSTREAM -> UP: " + packet.toString());
+        OutputWindow.print("DOWNSTREAM -> UP: " + packet.toString());
 
         PacketSignal packetSignal = packet.handle(this);
         if (packetSignal == PacketSignal.HANDLED) {

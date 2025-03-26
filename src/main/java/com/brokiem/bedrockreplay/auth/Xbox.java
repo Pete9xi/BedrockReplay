@@ -7,6 +7,7 @@ package com.brokiem.bedrockreplay.auth;
 
 import com.alibaba.fastjson.JSONObject;
 import com.brokiem.bedrockreplay.bedrock.server.ProxyServer;
+import com.brokiem.bedrockreplay.output.OutputWindow;
 import com.brokiem.bedrockreplay.utils.FileManager;
 import com.brokiem.bedrockreplay.utils.JoseUtils;
 import com.brokiem.bedrockreplay.utils.Utils;
@@ -115,10 +116,24 @@ public class Xbox {
         this.addSignatureHeader(connection, jsonObject, privateKey);
         this.writeJsonObjectToPost(connection, jsonObject);
 
-        String response = FileManager.getFileContents(connection.getInputStream());
-        JSONObject responseJsonObject = JSONObject.parseObject(response);
+        try {
+            String response = FileManager.getFileContents(connection.getInputStream());
+            JSONObject responseJsonObject = JSONObject.parseObject(response);
+            return responseJsonObject.getJSONObject("AuthorizationToken").toString();
+        } catch (Exception e) {
+            // Log the error details
+           OutputWindow.print("Failed to get XBL Token. HTTP Response Code: " + connection.getResponseCode());
+           OutputWindow.print("Response Message: " + connection.getResponseMessage());
+            e.printStackTrace();
 
-        return responseJsonObject.getJSONObject("AuthorizationToken").toString();
+            // Read and log the error stream (if available)
+            if (connection.getErrorStream() != null) {
+                String errorResponse = FileManager.getFileContents(connection.getErrorStream());
+                OutputWindow.print("Error Response: " + errorResponse);
+            }
+
+            throw e;
+        }
     }
 
     public String requestMinecraftChain(String xsts, ECPublicKey publicKey) throws Exception {
